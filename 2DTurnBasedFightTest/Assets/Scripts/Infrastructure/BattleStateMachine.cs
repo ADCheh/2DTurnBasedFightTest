@@ -12,7 +12,9 @@ namespace Infrastructure
         {
             _states = new Dictionary<Type, IState>
             {
-                [typeof(EntryState)] = new EntryState(this)
+                [typeof(EntryState)] = new EntryState(this),
+                [typeof(PlayerTurn)] = new PlayerTurn(this),
+                [typeof(EnemyTurn)] = new EnemyTurn(this)
             };
         }
         public void Enter<TState>() where TState : IState
