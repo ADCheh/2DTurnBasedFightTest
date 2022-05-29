@@ -1,10 +1,10 @@
 ﻿namespace Infrastructure
 {
-    public class PlayerTurn : IState
+    public class EnemyTurnState : IState
     {
         private readonly BattleStateMachine _battleStateMachine;
 
-        public PlayerTurn(BattleStateMachine battleStateMachine)
+        public EnemyTurnState(BattleStateMachine battleStateMachine)
         {
             _battleStateMachine = battleStateMachine;
         }

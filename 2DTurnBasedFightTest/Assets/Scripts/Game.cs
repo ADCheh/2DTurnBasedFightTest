@@ -1,15 +1,21 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Infrastructure;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
-public class Game : MonoBehaviour
+public class Game
 {
     public BattleStateMachine BattleStateMachine;
-    void Awake()
+    public BattleController BattleController;
+
+    
+
+    public Game(ICoroutineRunner coroutineRunner)
     {
-        BattleStateMachine = new BattleStateMachine();
-        BattleStateMachine.Enter<EntryState>();
+        BattleStateMachine = new BattleStateMachine(new SceneLoader(coroutineRunner));
+        BattleController = new BattleController(BattleStateMachine, new UiController());
     }
 
 }
