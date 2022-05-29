@@ -7,5 +7,6 @@ namespace Infrastructure.AssetManagement
     {
         GameObject Instantiate(string path);
         GameObject Instantiate(string path, Transform at);
+        GameObject Instantiate(string path, Transform at, bool flipX = false);
     }
 }

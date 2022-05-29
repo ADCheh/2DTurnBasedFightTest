@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Infrastructure.AssetManagement;
+using Spine.Unity;
 using UnityEngine;
 
 namespace Infrastructure.Factory
@@ -28,16 +29,17 @@ namespace Infrastructure.Factory
 
         public List<GameObject> CreateEnemyCharacters()
         {
-            return CreateCharacters(AssetPath.EnemyCharactersPath,GameObject.FindGameObjectsWithTag(EnemyPositionTag));
+            var enemyList = CreateCharacters(AssetPath.EnemyCharactersPath,GameObject.FindGameObjectsWithTag(EnemyPositionTag), true);
+            return enemyList;
         }
 
-        private List<GameObject> CreateCharacters(string characterPath,GameObject[] positions)
+        private List<GameObject> CreateCharacters(string characterPath,GameObject[] positions, bool flipX = false)
         {
             List<GameObject> charactersList = new List<GameObject>();
             
             foreach (var position in positions)
             {
-                GameObject character = _assetProvider.Instantiate(characterPath, position.transform);
+                GameObject character = _assetProvider.Instantiate(characterPath, position.transform, flipX);
                 charactersList.Add(character);
             }
 
