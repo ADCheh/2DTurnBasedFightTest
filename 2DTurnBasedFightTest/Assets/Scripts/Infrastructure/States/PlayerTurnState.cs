@@ -1,12 +1,10 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
-
-namespace Infrastructure
+﻿namespace Infrastructure.States
 {
     public class PlayerTurnState : IState
     {
         private readonly BattleStateMachine _battleStateMachine;
         
+
 
         public PlayerTurnState(BattleStateMachine battleStateMachine)
         {
