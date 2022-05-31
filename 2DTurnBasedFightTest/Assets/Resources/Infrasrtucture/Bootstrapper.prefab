@@ -43,3 +43,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 123aa3bd13b2d354eb8371e742924f0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  BattleHudPrefab: {fileID: 7238228751236226859, guid: dff97d78dd26cdd4daed94bbbb63e2ef, type: 3}

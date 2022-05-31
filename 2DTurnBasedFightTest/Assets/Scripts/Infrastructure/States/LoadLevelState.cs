@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Infrastructure.Battle;
 using Infrastructure.Factory;
 using UnityEngine;
 
@@ -10,11 +11,15 @@ namespace Infrastructure.States
         private readonly SceneLoader _sceneLoader;
         private readonly IGameFactory _gameFactory;
 
-        public LoadLevelState(BattleStateMachine battleStateMachine, SceneLoader sceneLoader, IGameFactory gameFactory)
+        private IBattleController _battleController;
+        private readonly GameObject _battleHudController;
+
+        public LoadLevelState(BattleStateMachine battleStateMachine, SceneLoader sceneLoader, IGameFactory gameFactory, IBattleController battleController)
         {
             _battleStateMachine = battleStateMachine;
             _sceneLoader = sceneLoader;
             _gameFactory = gameFactory;
+            _battleController = battleController;
         }
         
         public void Enter(string sceneName)
@@ -29,10 +34,14 @@ namespace Infrastructure.States
 
         private void OnLoaded()
         {
-            List<GameObject> playerCharacters = _gameFactory.CreatePlayerCharacters();
-            List<GameObject> enemyCharacters = _gameFactory.CreateEnemyCharacters();
+            _battleController.GetFightPositions();
+            _battleController.InitPlayerCharacters(_gameFactory.CreatePlayerCharacters());
+            _battleController.InitEnemyCharacters(_gameFactory.CreateEnemyCharacters());
 
-            _gameFactory.CreateHud();
+            //List<GameObject> playerCharacters = _gameFactory.CreatePlayerCharacters();
+            //List<GameObject> enemyCharacters = _gameFactory.CreateEnemyCharacters();
+            
+            //_gameFactory.CreateHud();
             
             _battleStateMachine.Enter<PlayerTurnState>();
         }

@@ -6,7 +6,9 @@ TagManager:
   tags:
   - PlayerPosition
   - EnemyPosition
-  - FightPosition
+  - PlayerFightPosition
+  - EnemyFightPosition
+  - BattleUI
   layers:
   - Default
   - TransparentFX

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Infrastructure.Battle;
 using Infrastructure.Factory;
 using Infrastructure.Services;
+using UnityEngine;
 
 namespace Infrastructure.States
 {
@@ -15,7 +17,8 @@ namespace Infrastructure.States
             _states = new Dictionary<Type, IExitableState>
             {
                 [typeof(EntryState)] = new EntryState(this,sceneLoader, services),
-                [typeof(LoadLevelState)] = new LoadLevelState(this,sceneLoader, services.Single<IGameFactory>()),
+                [typeof(LoadLevelState)] = new LoadLevelState(this,sceneLoader, services.Single<IGameFactory>(),
+                    services.Single<IBattleController>()),
                 [typeof(PlayerTurnState)] = new PlayerTurnState(this),
                 [typeof(EnemyTurnState)] = new EnemyTurnState(this)
             };
@@ -37,6 +40,9 @@ namespace Infrastructure.States
             _activeState?.Exit();
             TState state = GetState<TState>();
             _activeState = state;
+            //
+            Debug.Log(state);
+            //
             return state;
         }
 

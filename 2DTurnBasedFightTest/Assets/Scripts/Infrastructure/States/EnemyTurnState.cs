@@ -1,9 +1,10 @@
-﻿namespace Infrastructure.States
+﻿using UnityEngine;
+
+namespace Infrastructure.States
 {
     public class EnemyTurnState : IState
     {
         private readonly BattleStateMachine _battleStateMachine;
-
         public EnemyTurnState(BattleStateMachine battleStateMachine)
         {
             _battleStateMachine = battleStateMachine;

@@ -1,4 +1,5 @@
 ﻿using Infrastructure.AssetManagement;
+using Infrastructure.Battle;
 using Infrastructure.Factory;
 using Infrastructure.Services;
 
@@ -16,7 +17,7 @@ namespace Infrastructure.States
             _battleStateMachine = battleStateMachine;
             _sceneLoader = sceneLoader;
             _services = services;
-            
+
             RegisterServices();
         }
 
@@ -29,6 +30,7 @@ namespace Infrastructure.States
         {
             _services.RegisterSingle<IAssetProvider>(new AssetProvider());
             _services.RegisterSingle<IGameFactory>(new GameFactory(_services.Single<IAssetProvider>()));
+            _services.RegisterSingle<IBattleController>(new BattleController());
         }
 
         private void EnterLoadLevel()

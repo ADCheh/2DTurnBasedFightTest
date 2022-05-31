@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 2182297763201101569}
   - component: {fileID: 3036957800371685956}
   - component: {fileID: 4592677868630154209}
-  - component: {fileID: 2421194345093178425}
   - component: {fileID: 8142003888478958190}
   - component: {fileID: 8741671025698103913}
   - component: {fileID: 1879771049162421688}
@@ -121,21 +120,6 @@ MonoBehaviour:
   _animationName: Idle
   loop: 1
   timeScale: 1
---- !u!114 &2421194345093178425
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1653404633572910469}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 14d2ddc5448df9c47bc4be34190f2ca1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CharacterClicked:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!61 &8142003888478958190
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -197,5 +181,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   footstepEventName: footstep
   attackComplete:
+    m_PersistentCalls:
+      m_Calls: []
+  characterClicked:
     m_PersistentCalls:
       m_Calls: []
