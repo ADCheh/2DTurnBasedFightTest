@@ -117,6 +117,9 @@ namespace Infrastructure.Battle
 
                 ActivePlayerCharacter.transform.position = PlayerFightPosition.transform.position;
                 ActiveEnemyCharacter.transform.position = EnemyFightPosition.transform.position;
+
+                ActivePlayerCharacter.GetComponent<Renderer>().sortingOrder = 2;
+                ActiveEnemyCharacter.GetComponent<Renderer>().sortingOrder = 2;
                 
                 GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>().SetFightCurtain(true);
 
@@ -142,6 +145,9 @@ namespace Infrastructure.Battle
 
             ActivePlayerCharacter.transform.position = _playerFighterInitialPosition;
             ActiveEnemyCharacter.transform.position = _enemyFighterInitialPosition;
+            
+            ActivePlayerCharacter.GetComponent<Renderer>().sortingOrder = 0;
+            ActiveEnemyCharacter.GetComponent<Renderer>().sortingOrder = 0;
             
             ActivePlayerCharacter.GetComponent<AnimationController>().GoIdle();
             ActiveEnemyCharacter.GetComponent<AnimationController>().GoIdle();

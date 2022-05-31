@@ -179,7 +179,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84983f7e12b1f6d43a042951e2b20a6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  footstepEventName: footstep
   attackComplete:
     m_PersistentCalls:
       m_Calls: []
