@@ -1,4 +1,5 @@
-﻿using Infrastructure.Battle;
+﻿using System.Collections;
+using Infrastructure.Battle;
 using Infrastructure.Services;
 using UnityEngine;
 
@@ -7,69 +8,96 @@ namespace Infrastructure.States
     public class PlayerTurnState : IState
     {
         private readonly BattleStateMachine _battleStateMachine;
-        private readonly BattleHudController _battleHudController;
-
         private readonly IBattleController _battleController;
+        private readonly ICoroutineRunner _coroutineRunner;
+        
+        private BattleHudController _battleUI;
 
 
-        public PlayerTurnState(BattleStateMachine battleStateMachine)
+        public PlayerTurnState(BattleStateMachine battleStateMachine, ICoroutineRunner coroutineRunner)
         {
             _battleStateMachine = battleStateMachine;
-
+            _coroutineRunner = coroutineRunner;
             _battleController = AllServices.Container.Single<IBattleController>();
         }
         public void Enter()
         {
-            //Выдать перса
-            //Включить кнопки
-            //
+            //_battleController.ClearActiveCharacters();
+            /*foreach (var enemyCharacter in _battleController.EnemyCharacters)
+            {
+                enemyCharacter.GetComponent<AnimationController>().characterClicked.RemoveAllListeners();
+            }*/
+            
+            if(_battleUI == null)
+                _battleUI = GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>(); 
+            
             ConfigureBattleUi();
             _battleController.GetPlayerCharacter();
         }
 
         public void Exit()
         {
-            var battleUI = GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>(); 
-            battleUI.SkipTurnButton.onClick.RemoveAllListeners();
-            battleUI.AttackButton.onClick.RemoveAllListeners();
-            battleUI.EnablePlayerButtons(false);
-            battleUI.SetFightCurtain(false);
+            _battleUI.EnablePlayerButtons(false);
+            _battleUI.SetFightCurtain(false);
             
-            _battleController.ClearActiveCharacters();
+            //_battleController.ClearActiveCharacters();
+            //_battleController.FightHandled.RemoveListener(EndPlayerTurn);
         }
 
         private void ConfigureBattleUi()
         {
-            var battleUI = GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>(); 
-            battleUI.EnablePlayerButtons(true);
-            battleUI.SkipTurnButton.onClick.AddListener(HandleSkipButtonClick);
-            battleUI.AttackButton.onClick.AddListener(HandleAttackButtonClick);
+            _battleUI.EnablePlayerButtons(true);
+            
+            
+            _battleUI.SkipTurnButton.onClick.AddListener(HandleSkipButtonClick);
+            
+            _battleUI.AttackButton.onClick.AddListener(HandleAttackButtonClick);
         }
 
         private void HandleSkipButtonClick()
         {
             Debug.Log("Skip clicked!");
             
-            _battleStateMachine.Enter<EnemyTurnState>();
+            ClearButtonsListeners();
+
+            _battleController.ClearActiveCharacters();
+            
+           EndPlayerTurn();
         }
 
         private void HandleAttackButtonClick()
         {
             Debug.Log("Attack clicked!");
             
-            _battleController.EnableEnemyCharacters();
+            ClearButtonsListeners();
 
-            foreach (var enemyCharacter in _battleController.EnemyCharacters)
+            foreach (var character in _battleController.EnemyCharacters)
             {
-                enemyCharacter.GetComponent<BoxCollider2D>().enabled = true;
-                enemyCharacter.GetComponent<AnimationController>().characterClicked.AddListener(EnemyTargetSelected);
+                character.GetComponent<AnimationController>().characterClicked.AddListener(EnemyTargetSelected);
             }
+            
+            _battleController.SwitchEnemyColliders(true);
+            
+            //_battleController.FightHandled.AddListener(EndPlayerTurn);
+            
+
         }
 
-        private void EnemyTargetSelected(GameObject enemyTarget)
+        private void ClearButtonsListeners()
         {
-            _battleController.SetActiveEnemyCharacter(enemyTarget);
+            _battleUI.SkipTurnButton.onClick.RemoveAllListeners();
+            _battleUI.AttackButton.onClick.RemoveAllListeners();
+        }
+
+        private void EnemyTargetSelected()
+        {
+            _battleController.SwitchEnemyColliders(false);
             
+            foreach (var character in _battleController.EnemyCharacters)
+            {
+                character.GetComponent<AnimationController>().characterClicked.RemoveAllListeners();
+            }
+
             _battleController.FightHandled.AddListener(EndPlayerTurn);
             
             _battleController.HandleFight(this);
@@ -77,6 +105,18 @@ namespace Infrastructure.States
 
         private void EndPlayerTurn()
         {
+            //_coroutineRunner.StartCoroutine(PlayerTurnEndDelay());
+            _battleController.FightHandled.RemoveAllListeners();
+
+            _coroutineRunner.StartCoroutine(PlayerTurnEndDelay());
+            //_battleController.ClearActiveCharacters();
+            //_battleStateMachine.Enter<EnemyTurnState>();
+        }
+
+        private IEnumerator PlayerTurnEndDelay()
+        {
+            yield return new WaitForSeconds(1f);
+            
             _battleStateMachine.Enter<EnemyTurnState>();
         }
     }

@@ -5,16 +5,11 @@ using UnityEngine.UI;
 
 namespace Infrastructure
 {
-    public class BattleHudController : MonoBehaviour, IService
+    public class BattleHudController : MonoBehaviour
     {
         public Button AttackButton;
         public Button SkipTurnButton;
         public GameObject FightCurtain;
-
-        public void Start()
-        {
-            AllServices.Container.RegisterSingle<BattleHudController>(this);
-        }
 
         public void SetFightCurtain(bool isActive)
         {

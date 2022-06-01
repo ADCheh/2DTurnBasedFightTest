@@ -11,12 +11,14 @@ namespace Infrastructure.States
         private readonly BattleStateMachine _battleStateMachine;
         private readonly SceneLoader _sceneLoader;
         private readonly AllServices _services;
+        private readonly ICoroutineRunner _coroutineRunner;
 
-        public EntryState(BattleStateMachine battleStateMachine, SceneLoader sceneLoader, AllServices services)
+        public EntryState(BattleStateMachine battleStateMachine, SceneLoader sceneLoader, AllServices services, ICoroutineRunner coroutineRunner)
         {
             _battleStateMachine = battleStateMachine;
             _sceneLoader = sceneLoader;
             _services = services;
+            _coroutineRunner = coroutineRunner;
 
             RegisterServices();
         }
@@ -30,7 +32,7 @@ namespace Infrastructure.States
         {
             _services.RegisterSingle<IAssetProvider>(new AssetProvider());
             _services.RegisterSingle<IGameFactory>(new GameFactory(_services.Single<IAssetProvider>()));
-            _services.RegisterSingle<IBattleController>(new BattleController());
+            _services.RegisterSingle<IBattleController>(new BattleController(_coroutineRunner));
         }
 
         private void EnterLoadLevel()

@@ -12,7 +12,6 @@ namespace Infrastructure.States
         private readonly IGameFactory _gameFactory;
 
         private IBattleController _battleController;
-        private readonly GameObject _battleHudController;
 
         public LoadLevelState(BattleStateMachine battleStateMachine, SceneLoader sceneLoader, IGameFactory gameFactory, IBattleController battleController)
         {
@@ -38,11 +37,6 @@ namespace Infrastructure.States
             _battleController.InitPlayerCharacters(_gameFactory.CreatePlayerCharacters());
             _battleController.InitEnemyCharacters(_gameFactory.CreateEnemyCharacters());
 
-            //List<GameObject> playerCharacters = _gameFactory.CreatePlayerCharacters();
-            //List<GameObject> enemyCharacters = _gameFactory.CreateEnemyCharacters();
-            
-            //_gameFactory.CreateHud();
-            
             _battleStateMachine.Enter<PlayerTurnState>();
         }
     }

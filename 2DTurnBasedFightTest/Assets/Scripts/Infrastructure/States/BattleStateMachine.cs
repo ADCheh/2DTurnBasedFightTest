@@ -12,14 +12,14 @@ namespace Infrastructure.States
         private readonly Dictionary<Type, IExitableState> _states;
         private IExitableState _activeState;
 
-        public BattleStateMachine(SceneLoader sceneLoader, AllServices services)
+        public BattleStateMachine(SceneLoader sceneLoader, AllServices services, ICoroutineRunner coroutineRunner)
         {
             _states = new Dictionary<Type, IExitableState>
             {
-                [typeof(EntryState)] = new EntryState(this,sceneLoader, services),
+                [typeof(EntryState)] = new EntryState(this,sceneLoader, services, coroutineRunner),
                 [typeof(LoadLevelState)] = new LoadLevelState(this,sceneLoader, services.Single<IGameFactory>(),
                     services.Single<IBattleController>()),
-                [typeof(PlayerTurnState)] = new PlayerTurnState(this),
+                [typeof(PlayerTurnState)] = new PlayerTurnState(this, coroutineRunner),
                 [typeof(EnemyTurnState)] = new EnemyTurnState(this)
             };
         }

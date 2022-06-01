@@ -9,7 +9,7 @@ namespace Infrastructure
 
         public Game(ICoroutineRunner coroutineRunner)
         {
-            BattleStateMachine = new BattleStateMachine(new SceneLoader(coroutineRunner), AllServices.Container);
+            BattleStateMachine = new BattleStateMachine(new SceneLoader(coroutineRunner), AllServices.Container, coroutineRunner);
         }
 
     }

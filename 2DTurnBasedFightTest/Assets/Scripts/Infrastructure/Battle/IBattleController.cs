@@ -19,7 +19,7 @@ namespace Infrastructure.Battle
         void SetActivePlayerCharacter(GameObject character);
         void SetActiveEnemyCharacter(GameObject character);
         void ClearActiveCharacters();
-        void EnableEnemyCharacters();
+        void SwitchEnemyColliders(bool isActive);
 
         void HandleFight(IExitableState currentState);
     }

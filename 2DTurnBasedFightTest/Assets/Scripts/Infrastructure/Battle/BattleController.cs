@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Infrastructure.Services;
 using Infrastructure.States;
@@ -26,8 +27,11 @@ namespace Infrastructure.Battle
         private Vector3 _playerFighterInitialPosition;
         private Vector3 _enemyFighterInitialPosition;
 
-        public BattleController()
+        private ICoroutineRunner _coroutineRunner;
+
+        public BattleController(ICoroutineRunner coroutineRunner)
         {
+            _coroutineRunner = coroutineRunner;
             FightHandled = new UnityEvent();
         }
 
@@ -57,7 +61,7 @@ namespace Infrastructure.Battle
         {
             ActiveEnemyCharacter = character;
             ActiveEnemyCharacter.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
-            DisableEnemyCharacters();
+            SwitchEnemyColliders(false);
         }
 
         public void InitPlayerCharacters(List<GameObject> playerCharacters)
@@ -81,82 +85,102 @@ namespace Infrastructure.Battle
             if (ActivePlayerCharacter != null)
             {
                 ActivePlayerCharacter.transform.localScale = new Vector3(1f, 1f, 1f);
+                ActivePlayerCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
                 ActivePlayerCharacter = null;
             }
             
             if (ActiveEnemyCharacter != null)
             {
                 ActiveEnemyCharacter.transform.localScale = new Vector3(1f, 1f, 1f);
+                ActiveEnemyCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
                 ActiveEnemyCharacter = null;
             }
-                
         }
 
-        public void EnableEnemyCharacters()
+        public void SwitchEnemyColliders(bool isActive)
         {
             foreach (var character in EnemyCharacters)
             {
-                character.GetComponent<BoxCollider2D>().enabled = true;
+                character.GetComponent<BoxCollider2D>().enabled = isActive;
             }
         }
 
-        private void DisableEnemyCharacters()
-        {
-            foreach (var character in EnemyCharacters)
-            {
-                character.GetComponent<BoxCollider2D>().enabled = false;
-            }
-        }
 
         public void HandleFight(IExitableState currentState)
         {
-            if (currentState is PlayerTurnState)
-            {
-                _playerFighterInitialPosition = ActivePlayerCharacter.transform.position;
-                _enemyFighterInitialPosition = ActiveEnemyCharacter.transform.position;
+            _playerFighterInitialPosition = ActivePlayerCharacter.GetComponentInParent<Transform>().position;
+            _enemyFighterInitialPosition = ActiveEnemyCharacter.GetComponentInParent<Transform>().position;
 
-                ActivePlayerCharacter.transform.position = PlayerFightPosition.transform.position;
-                ActiveEnemyCharacter.transform.position = EnemyFightPosition.transform.position;
+            //Vector3.Lerp(ActivePlayerCharacter.transform.position, PlayerFightPosition.transform.position, 0.1f);
+            //Vector3.Lerp(ActiveEnemyCharacter.transform.position, EnemyFightPosition.transform.position, 0.1f);
+            
+            ActivePlayerCharacter.transform.position = PlayerFightPosition.transform.position;
+            ActiveEnemyCharacter.transform.position = EnemyFightPosition.transform.position;
 
-                ActivePlayerCharacter.GetComponent<Renderer>().sortingOrder = 2;
-                ActiveEnemyCharacter.GetComponent<Renderer>().sortingOrder = 2;
+            ActivePlayerCharacter.GetComponent<Renderer>().sortingOrder = 2;
+            ActiveEnemyCharacter.GetComponent<Renderer>().sortingOrder = 2;
                 
-                GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>().SetFightCurtain(true);
+            GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>().SetFightCurtain(true);
 
-                var playerAnimation = ActivePlayerCharacter.GetComponent<AnimationController>();
-                var enemyAnimation = ActiveEnemyCharacter.GetComponent<AnimationController>();
-                
-                playerAnimation.attackComplete.AddListener(CharactersGoIdle);
-                playerAnimation.PlayAttack();
-                enemyAnimation.PlayDamage();
-            }
+            var playerAnimation = ActivePlayerCharacter.GetComponent<AnimationController>();
+            var enemyAnimation = ActiveEnemyCharacter.GetComponent<AnimationController>();
 
             if (currentState is EnemyTurnState)
             {
-                
-            }
+                enemyAnimation.attackComplete.AddListener(CharactersGoIdle);
+                enemyAnimation.PlayAttack();
+                playerAnimation.PlayDamage();
 
-            //FightHandled?.Invoke();
+                Debug.Log("------------------------------Enemy--------------------");
+            }
+            /*else
+            {
+                playerAnimation.attackComplete.AddListener(CharactersGoIdle);
+                playerAnimation.PlayAttack();
+                enemyAnimation.PlayDamage();
+
+                Debug.Log("------------------------------Player--------------------");
+            }*/
+
+            if (currentState is PlayerTurnState)
+            {
+                playerAnimation.attackComplete.AddListener(CharactersGoIdle);
+                playerAnimation.PlayAttack();
+                enemyAnimation.PlayDamage();
+
+                Debug.Log("------------------------------Player--------------------");
+            }
         }
 
         private void CharactersGoIdle()
         {
             Debug.Log("CharactersGoIdle");
-
+            
+            ActivePlayerCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
+            ActiveEnemyCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
+            
             ActivePlayerCharacter.transform.position = _playerFighterInitialPosition;
             ActiveEnemyCharacter.transform.position = _enemyFighterInitialPosition;
             
             ActivePlayerCharacter.GetComponent<Renderer>().sortingOrder = 0;
             ActiveEnemyCharacter.GetComponent<Renderer>().sortingOrder = 0;
-            
+
             ActivePlayerCharacter.GetComponent<AnimationController>().GoIdle();
             ActiveEnemyCharacter.GetComponent<AnimationController>().GoIdle();
             
             GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>().SetFightCurtain(false);
             
+            ClearActiveCharacters();
+
+            _coroutineRunner.StartCoroutine(PlacementDelay());
+            
+            //FightHandled?.Invoke();
+        }
+
+        private IEnumerator PlacementDelay()
+        {
+            yield return null;
             FightHandled?.Invoke();
-            
-            
         }
     }
 }
