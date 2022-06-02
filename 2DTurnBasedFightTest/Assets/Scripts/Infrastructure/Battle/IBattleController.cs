@@ -17,7 +17,6 @@ namespace Infrastructure.Battle
         void GetFightPositions();
         GameObject GetPlayerCharacter(IExitableState state);
         GameObject GetEnemyCharacter();
-        void SetActivePlayerCharacter(GameObject character);
         void SetActiveEnemyCharacter(GameObject character);
         void ClearActiveCharacters();
         void SwitchEnemyColliders(bool isActive);

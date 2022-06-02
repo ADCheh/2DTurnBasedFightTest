@@ -36,19 +36,13 @@ public class AnimationController : MonoBehaviour
     public void OnMouseDown()
     {
         AllServices.Container.Single<IBattleController>().SetActiveEnemyCharacter(gameObject);
-        
         characterClicked?.Invoke();
-        
-        //AllServices.Container.Single<IBattleController>().HandleFight(null);
     }
 
     private void AttackComplete(TrackEntry trackEntry)
     {
         if (trackEntry.Animation.name != "DoubleShift")
             return;
-        
-        Debug.Log("Attack complete!");
         attackComplete?.Invoke();
-        
     }
 }

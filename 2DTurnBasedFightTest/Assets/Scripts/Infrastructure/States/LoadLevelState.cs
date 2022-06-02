@@ -11,7 +11,7 @@ namespace Infrastructure.States
         private readonly SceneLoader _sceneLoader;
         private readonly IGameFactory _gameFactory;
 
-        private IBattleController _battleController;
+        private readonly IBattleController _battleController;
 
         public LoadLevelState(BattleStateMachine battleStateMachine, SceneLoader sceneLoader, IGameFactory gameFactory, IBattleController battleController)
         {

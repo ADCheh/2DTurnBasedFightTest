@@ -22,13 +22,6 @@ namespace Infrastructure.States
         }
         public void Enter()
         {
-            //_battleController.ClearActiveCharacters();
-            /*foreach (var enemyCharacter in _battleController.EnemyCharacters)
-            {
-                enemyCharacter.GetComponent<AnimationController>().characterClicked.RemoveAllListeners();
-            }*/
-            
-            
             if(_battleUI == null)
                 _battleUI = GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>(); 
             
@@ -40,39 +33,27 @@ namespace Infrastructure.States
         {
             _battleUI.EnablePlayerButtons(false);
             _battleUI.SetFightCurtain(false);
-            
-            //_battleController.ClearActiveCharacters();
-            //_battleController.FightHandled.RemoveListener(EndPlayerTurn);
         }
 
         private void ConfigureBattleUi()
         {
             _battleUI.RoundCounter.text = $"Round {_battleController.RoundCounter}";
             _battleUI.CurrentTurnText.text = "Player turn";
-            
             _battleUI.EnablePlayerButtons(true);
-            
-            
             _battleUI.SkipTurnButton.onClick.AddListener(HandleSkipButtonClick);
-            
             _battleUI.AttackButton.onClick.AddListener(HandleAttackButtonClick);
         }
 
         private void HandleSkipButtonClick()
         {
-            Debug.Log("Skip clicked!");
-            
             ClearButtonsListeners();
-
             _battleController.ClearActiveCharacters();
             
-           EndPlayerTurn();
+            EndPlayerTurn();
         }
 
         private void HandleAttackButtonClick()
         {
-            Debug.Log("Attack clicked!");
-            
             ClearButtonsListeners();
 
             foreach (var character in _battleController.EnemyCharacters)
@@ -81,10 +62,6 @@ namespace Infrastructure.States
             }
             
             _battleController.SwitchEnemyColliders(true);
-            
-            //_battleController.FightHandled.AddListener(EndPlayerTurn);
-            
-
         }
 
         private void ClearButtonsListeners()
@@ -103,18 +80,13 @@ namespace Infrastructure.States
             }
 
             _battleController.FightHandled.AddListener(EndPlayerTurn);
-            
             _battleController.HandleFight(this);
         }
 
         private void EndPlayerTurn()
         {
-            //_coroutineRunner.StartCoroutine(PlayerTurnEndDelay());
             _battleController.FightHandled.RemoveAllListeners();
-
             _coroutineRunner.StartCoroutine(PlayerTurnEndDelay());
-            //_battleController.ClearActiveCharacters();
-            //_battleStateMachine.Enter<EnemyTurnState>();
         }
 
         private IEnumerator PlayerTurnEndDelay()

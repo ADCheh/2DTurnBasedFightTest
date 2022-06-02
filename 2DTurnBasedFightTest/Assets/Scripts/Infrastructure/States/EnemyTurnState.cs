@@ -19,7 +19,6 @@ namespace Infrastructure.States
             
             _battleController.GetPlayerCharacter(this);
             _battleController.GetEnemyCharacter();
-            
             _battleController.FightHandled.AddListener(EndEnemyTurn);
             _battleController.HandleFight(this);
         }

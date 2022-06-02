@@ -11,15 +11,9 @@ namespace Infrastructure.Factory
         private const string EnemyPositionTag = "EnemyPosition";
 
         private readonly IAssetProvider _assetProvider;
-
         public GameFactory(IAssetProvider assetProvider)
         {
             _assetProvider = assetProvider;
-        }
-
-        public void CreateHud()
-        {
-            _assetProvider.Instantiate(AssetPath.HudPath);
         }
 
         public List<GameObject> CreatePlayerCharacters()
@@ -42,7 +36,7 @@ namespace Infrastructure.Factory
                 GameObject character = _assetProvider.Instantiate(characterPath, position.transform, flipX);
                 charactersList.Add(character);
             }
-
+            
             return charactersList;
         }
     }

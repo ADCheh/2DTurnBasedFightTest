@@ -19,7 +19,6 @@ namespace Infrastructure.States
             _sceneLoader = sceneLoader;
             _services = services;
             _coroutineRunner = coroutineRunner;
-
             RegisterServices();
         }
 
@@ -44,6 +43,5 @@ namespace Infrastructure.States
         {
             
         }
-        
     }
 }

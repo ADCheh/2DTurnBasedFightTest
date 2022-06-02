@@ -5,7 +5,7 @@ namespace Infrastructure
 {
     public class Game
     {
-        public BattleStateMachine BattleStateMachine;
+        public readonly BattleStateMachine BattleStateMachine;
 
         public Game(ICoroutineRunner coroutineRunner)
         {
