@@ -10,6 +10,8 @@ namespace Infrastructure
         public Button AttackButton;
         public Button SkipTurnButton;
         public GameObject FightCurtain;
+        public Text RoundCounter;
+        public Text CurrentTurnText;
 
         public void SetFightCurtain(bool isActive)
         {

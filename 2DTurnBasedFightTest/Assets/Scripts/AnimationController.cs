@@ -23,7 +23,8 @@ public class AnimationController : MonoBehaviour
     }
     public void PlayDamage()
     {
-        gameObject.GetComponent<SkeletonAnimation>().AnimationState.SetAnimation(0, "Damage", true);
+        gameObject.GetComponent<SkeletonAnimation>().AnimationState.SetAnimation(0, "Damage", false);
+        gameObject.GetComponent<SkeletonAnimation>().AnimationState.AddAnimation(0, "Damage", false, 1.2f);
     }
 
     public void GoIdle()

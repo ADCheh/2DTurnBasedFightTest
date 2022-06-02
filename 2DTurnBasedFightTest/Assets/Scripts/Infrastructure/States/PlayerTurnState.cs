@@ -28,11 +28,12 @@ namespace Infrastructure.States
                 enemyCharacter.GetComponent<AnimationController>().characterClicked.RemoveAllListeners();
             }*/
             
+            
             if(_battleUI == null)
                 _battleUI = GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>(); 
             
             ConfigureBattleUi();
-            _battleController.GetPlayerCharacter();
+            _battleController.GetPlayerCharacter(this);
         }
 
         public void Exit()
@@ -46,6 +47,9 @@ namespace Infrastructure.States
 
         private void ConfigureBattleUi()
         {
+            _battleUI.RoundCounter.text = $"Round {_battleController.RoundCounter}";
+            _battleUI.CurrentTurnText.text = "Player turn";
+            
             _battleUI.EnablePlayerButtons(true);
             
             

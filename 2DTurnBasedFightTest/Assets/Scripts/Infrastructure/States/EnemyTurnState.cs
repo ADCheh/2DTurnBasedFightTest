@@ -15,7 +15,9 @@ namespace Infrastructure.States
         }
         public void Enter()
         {
-            _battleController.GetPlayerCharacter();
+            GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>().CurrentTurnText.text = "Enemy turn";
+            
+            _battleController.GetPlayerCharacter(this);
             _battleController.GetEnemyCharacter();
             
             _battleController.FightHandled.AddListener(EndEnemyTurn);

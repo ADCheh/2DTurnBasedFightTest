@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using Infrastructure.Services;
 using Infrastructure.States;
 using UnityEngine;
 using UnityEngine.Events;
@@ -14,86 +12,138 @@ namespace Infrastructure.Battle
         private const string PlayerFightPositionTag = "PlayerFightPosition";
         private const string EnemyFightPositionTag = "EnemyFightPosition";
 
+        public int RoundCounter { get; set; }
         public UnityEvent FightHandled { get; }
         public List<GameObject> PlayerCharacters { get; set; }
         public List<GameObject> EnemyCharacters { get; set; }
 
-        public GameObject ActivePlayerCharacter;
-        public GameObject ActiveEnemyCharacter;
+        private List<GameObject> _playerCharactersToPick = new List<GameObject>();
+        private List<GameObject> _enemyCharactersToPick = new List<GameObject>();
 
-        public GameObject PlayerFightPosition;
-        public GameObject EnemyFightPosition;
+        private GameObject _activePlayerCharacter;
+        private GameObject _activeEnemyCharacter;
+
+        private GameObject _playerFightPosition;
+        private GameObject _enemyFightPosition;
 
         private Vector3 _playerFighterInitialPosition;
         private Vector3 _enemyFighterInitialPosition;
 
-        private ICoroutineRunner _coroutineRunner;
+        private readonly ICoroutineRunner _coroutineRunner;
 
         public BattleController(ICoroutineRunner coroutineRunner)
         {
             _coroutineRunner = coroutineRunner;
             FightHandled = new UnityEvent();
+            RoundCounter = 1;
         }
 
-        public GameObject GetPlayerCharacter()
+        public GameObject GetPlayerCharacter(IExitableState state)
         {
-            var randomIndex = Random.Range(0, PlayerCharacters.Count);
-            ActivePlayerCharacter = PlayerCharacters[randomIndex];
-            ActivePlayerCharacter.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
-            return ActivePlayerCharacter;
+            if (state is EnemyTurnState)
+            {
+                var randomIndex = Random.Range(0, PlayerCharacters.Count);
+                _activePlayerCharacter = PlayerCharacters[randomIndex];
+            }
+            else
+            {
+                var randomIndex = Random.Range(0, _playerCharactersToPick.Count);
+                _activePlayerCharacter = _playerCharactersToPick[randomIndex];
+            
+                _playerCharactersToPick.RemoveAt(randomIndex);
+            }
+            
+            if (_playerCharactersToPick.Count == 0)
+            {
+                RoundCounter++;
+                
+                foreach (var character in PlayerCharacters)
+                {
+                    _playerCharactersToPick.Add(character);
+                }
+            }
+
+            _activePlayerCharacter.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
+            
+            return _activePlayerCharacter;
         }
         
         public GameObject GetEnemyCharacter()
         {
-            var randomIndex = Random.Range(0, EnemyCharacters.Count);
-            ActiveEnemyCharacter = EnemyCharacters[randomIndex];
-            ActiveEnemyCharacter.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
-            return ActiveEnemyCharacter;
+            if (_enemyCharactersToPick.Count == 0)
+            {
+
+                foreach (var character in EnemyCharacters)
+                {
+                    _enemyCharactersToPick.Add(character);
+                }
+            }
+            
+            //var randomIndex = Random.Range(0, EnemyCharacters.Count);
+            var randomIndex = Random.Range(0, _enemyCharactersToPick.Count);
+            
+            _activeEnemyCharacter = EnemyCharacters[randomIndex];
+            
+            _enemyCharactersToPick.RemoveAt(randomIndex);
+            
+            _activeEnemyCharacter.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
+
+            return _activeEnemyCharacter;
         }
 
         public void SetActivePlayerCharacter(GameObject character)
         {
-            ActivePlayerCharacter = character;
-            ActivePlayerCharacter.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
+            _activePlayerCharacter = character;
+            _activePlayerCharacter.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
         }
 
         public void SetActiveEnemyCharacter(GameObject character)
         {
-            ActiveEnemyCharacter = character;
-            ActiveEnemyCharacter.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
+            _activeEnemyCharacter = character;
+            _activeEnemyCharacter.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
             SwitchEnemyColliders(false);
         }
 
         public void InitPlayerCharacters(List<GameObject> playerCharacters)
         {
             PlayerCharacters = playerCharacters;
+            
+            foreach (var character in PlayerCharacters)
+            {
+                _playerCharactersToPick.Add(character);
+            }
         }
 
         public void InitEnemyCharacters(List<GameObject> enemyCharacters)
         {
             EnemyCharacters = enemyCharacters;
+            
+            foreach (var character in EnemyCharacters)
+            {
+                _enemyCharactersToPick.Add(character);
+            }
         }
 
         public void GetFightPositions()
         {
-            PlayerFightPosition = GameObject.FindWithTag(PlayerFightPositionTag);
-            EnemyFightPosition = GameObject.FindWithTag(EnemyFightPositionTag);
+            _playerFightPosition = GameObject.FindWithTag(PlayerFightPositionTag);
+            _enemyFightPosition = GameObject.FindWithTag(EnemyFightPositionTag);
         }
 
         public void ClearActiveCharacters()
         {
-            if (ActivePlayerCharacter != null)
+            if (_activePlayerCharacter != null)
             {
-                ActivePlayerCharacter.transform.localScale = new Vector3(1f, 1f, 1f);
-                ActivePlayerCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
-                ActivePlayerCharacter = null;
+                _activePlayerCharacter.transform.localScale = new Vector3(1f, 1f, 1f);
+                _activePlayerCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
+                _activePlayerCharacter = null;
             }
             
-            if (ActiveEnemyCharacter != null)
+            if (_activeEnemyCharacter != null)
             {
-                ActiveEnemyCharacter.transform.localScale = new Vector3(1f, 1f, 1f);
-                ActiveEnemyCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
-                ActiveEnemyCharacter = null;
+                _activeEnemyCharacter.transform.localScale = new Vector3(1f, 1f, 1f);
+                _activeEnemyCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
+                _activeEnemyCharacter = null;
             }
         }
 
@@ -108,22 +158,46 @@ namespace Infrastructure.Battle
 
         public void HandleFight(IExitableState currentState)
         {
-            _playerFighterInitialPosition = ActivePlayerCharacter.GetComponentInParent<Transform>().position;
-            _enemyFighterInitialPosition = ActiveEnemyCharacter.GetComponentInParent<Transform>().position;
-
-            //Vector3.Lerp(ActivePlayerCharacter.transform.position, PlayerFightPosition.transform.position, 0.1f);
-            //Vector3.Lerp(ActiveEnemyCharacter.transform.position, EnemyFightPosition.transform.position, 0.1f);
+            _playerFighterInitialPosition = _activePlayerCharacter.GetComponentInParent<Transform>().position;
+            _enemyFighterInitialPosition = _activeEnemyCharacter.GetComponentInParent<Transform>().position;
+            /*_coroutineRunner.StartCoroutine(MoveToFightPosition(_activePlayerCharacter.transform,
+                _playerFightPosition.transform.position));
             
-            ActivePlayerCharacter.transform.position = PlayerFightPosition.transform.position;
-            ActiveEnemyCharacter.transform.position = EnemyFightPosition.transform.position;
+            _coroutineRunner.StartCoroutine(MoveToFightPosition(_activeEnemyCharacter.transform,
+                _enemyFightPosition.transform.position));*/
+            
+            //_activePlayerCharacter.transform.position = _playerFightPosition.transform.position;
+            //_activeEnemyCharacter.transform.position = _enemyFightPosition.transform.position;
 
-            ActivePlayerCharacter.GetComponent<Renderer>().sortingOrder = 2;
-            ActiveEnemyCharacter.GetComponent<Renderer>().sortingOrder = 2;
+            _activePlayerCharacter.GetComponent<Renderer>().sortingOrder = 2;
+            _activeEnemyCharacter.GetComponent<Renderer>().sortingOrder = 2;
                 
             GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>().SetFightCurtain(true);
 
-            var playerAnimation = ActivePlayerCharacter.GetComponent<AnimationController>();
-            var enemyAnimation = ActiveEnemyCharacter.GetComponent<AnimationController>();
+            _coroutineRunner.StartCoroutine(TestFight(currentState));
+            /*_playerFighterInitialPosition = _activePlayerCharacter.GetComponentInParent<Transform>().position;
+            _enemyFighterInitialPosition = _activeEnemyCharacter.GetComponentInParent<Transform>().position;
+            
+            
+            _activePlayerCharacter.transform.position = Vector3.Lerp(_activePlayerCharacter.transform.position, _playerFightPosition.transform.position, 3f);
+            _activeEnemyCharacter.transform.position = Vector3.Lerp(_activeEnemyCharacter.transform.position, _enemyFightPosition.transform.position, 3f);
+
+            _coroutineRunner.StartCoroutine(MoveToFightPosition(_activePlayerCharacter.transform,
+                _playerFightPosition.transform.position));
+            
+            _coroutineRunner.StartCoroutine(MoveToFightPosition(_activeEnemyCharacter.transform,
+                _enemyFightPosition.transform.position));
+            
+            //_activePlayerCharacter.transform.position = _playerFightPosition.transform.position;
+            //_activeEnemyCharacter.transform.position = _enemyFightPosition.transform.position;
+
+            _activePlayerCharacter.GetComponent<Renderer>().sortingOrder = 2;
+            _activeEnemyCharacter.GetComponent<Renderer>().sortingOrder = 2;
+                
+            GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>().SetFightCurtain(true);
+
+            var playerAnimation = _activePlayerCharacter.GetComponent<AnimationController>();
+            var enemyAnimation = _activeEnemyCharacter.GetComponent<AnimationController>();
 
             if (currentState is EnemyTurnState)
             {
@@ -132,6 +206,98 @@ namespace Infrastructure.Battle
                 playerAnimation.PlayDamage();
 
                 Debug.Log("------------------------------Enemy--------------------");
+                
+            }
+
+            if (currentState is PlayerTurnState)
+            {
+                playerAnimation.attackComplete.AddListener(CharactersGoIdle);
+                playerAnimation.PlayAttack();
+                enemyAnimation.PlayDamage();
+
+                Debug.Log("------------------------------Player--------------------");
+            }*/
+        }
+
+        private void CharactersGoIdle()
+        {
+            Debug.Log("CharactersGoIdle");
+            
+            _activePlayerCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
+            _activeEnemyCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
+            
+            
+            
+            //_activePlayerCharacter.transform.position = _playerFighterInitialPosition;
+            //_activeEnemyCharacter.transform.position = _enemyFighterInitialPosition;
+
+            _coroutineRunner.StartCoroutine(TestBackPlacement());
+            
+            /*_activePlayerCharacter.GetComponent<AnimationController>().GoIdle();
+            _activeEnemyCharacter.GetComponent<AnimationController>().GoIdle();
+            
+            GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>().SetFightCurtain(false);
+            
+            ClearActiveCharacters();
+
+            _coroutineRunner.StartCoroutine(PlacementDelay());
+            
+            //FightHandled?.Invoke();*/
+        }
+
+        private IEnumerator PlacementDelay()
+        {
+            yield return null;
+            FightHandled?.Invoke();
+        }
+
+        private IEnumerator TestBackPlacement()
+        {
+            while (_activePlayerCharacter.transform.position != _playerFighterInitialPosition &&
+                   _activeEnemyCharacter.transform.position != _enemyFighterInitialPosition)
+            {
+                _activePlayerCharacter.transform.position = Vector3.Lerp(_activePlayerCharacter.transform.position,
+                    _playerFighterInitialPosition, Time.deltaTime * 10f);
+                _activeEnemyCharacter.transform.position = Vector3.Lerp(_activeEnemyCharacter.transform.position,
+                    _enemyFighterInitialPosition, Time.deltaTime * 10f);
+                yield return null;
+            }
+            
+            _activePlayerCharacter.GetComponent<Renderer>().sortingOrder = 0;
+            _activeEnemyCharacter.GetComponent<Renderer>().sortingOrder = 0;
+            
+            _activePlayerCharacter.GetComponent<AnimationController>().GoIdle();
+            _activeEnemyCharacter.GetComponent<AnimationController>().GoIdle();
+            
+            GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>().SetFightCurtain(false);
+            
+            ClearActiveCharacters();
+            
+            FightHandled?.Invoke();
+            
+        }
+
+        private IEnumerator TestFight(IExitableState currentState)
+        {
+            while (_activePlayerCharacter.transform.position != _playerFightPosition.transform.position &&
+                   _activeEnemyCharacter.transform.position != _enemyFightPosition.transform.position)
+            {
+                _activePlayerCharacter.transform.position = Vector3.Lerp(_activePlayerCharacter.transform.position, _playerFightPosition.transform.position, Time.deltaTime*10f);
+                _activeEnemyCharacter.transform.position = Vector3.Lerp(_activeEnemyCharacter.transform.position, _enemyFightPosition.transform.position, Time.deltaTime*10f);
+                yield return null;
+            }
+            
+            var playerAnimation = _activePlayerCharacter.GetComponent<AnimationController>();
+            var enemyAnimation = _activeEnemyCharacter.GetComponent<AnimationController>();
+
+            if (currentState is EnemyTurnState)
+            {
+                enemyAnimation.attackComplete.AddListener(CharactersGoIdle);
+                enemyAnimation.PlayAttack();
+                playerAnimation.PlayDamage();
+
+                Debug.Log("------------------------------Enemy--------------------");
+                
             }
             /*else
             {
@@ -150,37 +316,6 @@ namespace Infrastructure.Battle
 
                 Debug.Log("------------------------------Player--------------------");
             }
-        }
-
-        private void CharactersGoIdle()
-        {
-            Debug.Log("CharactersGoIdle");
-            
-            ActivePlayerCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
-            ActiveEnemyCharacter.GetComponent<AnimationController>().attackComplete.RemoveAllListeners();
-            
-            ActivePlayerCharacter.transform.position = _playerFighterInitialPosition;
-            ActiveEnemyCharacter.transform.position = _enemyFighterInitialPosition;
-            
-            ActivePlayerCharacter.GetComponent<Renderer>().sortingOrder = 0;
-            ActiveEnemyCharacter.GetComponent<Renderer>().sortingOrder = 0;
-
-            ActivePlayerCharacter.GetComponent<AnimationController>().GoIdle();
-            ActiveEnemyCharacter.GetComponent<AnimationController>().GoIdle();
-            
-            GameObject.FindWithTag("BattleUI").GetComponent<BattleHudController>().SetFightCurtain(false);
-            
-            ClearActiveCharacters();
-
-            _coroutineRunner.StartCoroutine(PlacementDelay());
-            
-            //FightHandled?.Invoke();
-        }
-
-        private IEnumerator PlacementDelay()
-        {
-            yield return null;
-            FightHandled?.Invoke();
         }
     }
 }
