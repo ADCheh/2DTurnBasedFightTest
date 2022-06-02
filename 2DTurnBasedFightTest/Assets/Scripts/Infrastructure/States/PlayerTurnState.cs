@@ -48,19 +48,16 @@ namespace Infrastructure.States
         {
             ClearButtonsListeners();
             _battleController.ClearActiveCharacters();
-            
             EndPlayerTurn();
         }
 
         private void HandleAttackButtonClick()
         {
             ClearButtonsListeners();
-
             foreach (var character in _battleController.EnemyCharacters)
             {
                 character.GetComponent<AnimationController>().characterClicked.AddListener(EnemyTargetSelected);
             }
-            
             _battleController.SwitchEnemyColliders(true);
         }
 
@@ -91,7 +88,7 @@ namespace Infrastructure.States
 
         private IEnumerator PlayerTurnEndDelay()
         {
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.5f);
             
             _battleStateMachine.Enter<EnemyTurnState>();
         }

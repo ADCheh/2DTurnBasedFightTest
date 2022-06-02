@@ -30,7 +30,6 @@ namespace Infrastructure.States
         
         private void EndEnemyTurn()
         {
-            _battleController.ClearActiveCharacters();
             _battleController.FightHandled.RemoveAllListeners();
             _battleStateMachine.Enter<PlayerTurnState>();
         }
